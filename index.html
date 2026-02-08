@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PPT Arena Privada</title>
+    <style>
+        body { margin: 0; background: #121212; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; }
+        .container { padding: 20px; max-width: 500px; margin: auto; }
+        .tela { display: none; }
+        .ativa { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }
+        
+        input { 
+            padding: 15px; border-radius: 10px; border: 2px solid #333; background: #222; 
+            color: white; width: 80%; margin: 10px 0; font-size: 18px; text-align: center;
+        }
+        
+        .btn { 
+            background: #3498db; color: white; border: none; padding: 15px 30px; 
+            border-radius: 10px; font-size: 18px; cursor: pointer; transition: 0.3s; width: 85%; margin: 5px;
+        }
+        .btn:disabled { background: #555; opacity: 0.5; cursor: not-allowed; }
+        .btn-arma { font-size: 30px; padding: 20px; width: 100px; height: 100px; }
+
+        .id-destaque { font-size: 40px; color: #f1c40f; letter-spacing: 5px; margin: 20px 0; }
+        #status-sala { background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; width: 100%; }
+        
+        .vitoria { font-size: 24px; color: #2ecc71; margin-top: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="tela-login" class="tela ativa">
+            <h1>🎮 PPT Arena</h1>
+            <input type="text" id="meu-nome" placeholder="Digite seu Nome">
+            <button class="btn" onclick="criarSala()">CRIAR SALA (Sou o Dono)</button>
+            <p>OU</p>
+            <input type="text" id="input-id" placeholder="Digite o ID da Sala">
+            <button class="btn" style="background: #2ecc71;" onclick="entrarNaSala()">ENTRAR NA SALA</button>
+        </div>
+
+        <div id="tela-dono" class="tela">
+            <h2>ID DA SUA SALA:</h2>
+            <div class="id-destaque" id="display-id">----</div>
+            <div id="status-sala">
+                <p id="p1-info">Aguardando Jogador 1...</p>
+                <p id="p2-info">Aguardando Jogador 2...</p>
+            </div>
+            <div id="resultado-final" class="vitoria"></div>
+            <button id="btn-iniciar" class="btn" style="background: #e67e22; margin-top: 30px;" disabled onclick="comecarJogo()">INICIAR CONTAGEM</button>
+        </div>
+
+        <div id="tela-jogador" class="tela">
+            <h3>Jogador: <span id="span-nome-jogador"></span></h3>
+            <p>ID da Sala: <span id="span-id-conectado"></span></p>
+            <hr style="width: 100%; border: 0.5px solid #333;">
+            <p>Escolha sua arma (Um de cada):</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-arma" id="btn-0" onclick="confirmarEscolha(0, '🪨')">🪨</button>
+                <button class="btn btn-arma" id="btn-1" onclick="confirmarEscolha(1, '📄')">📄</button>
+                <button class="btn btn-arma" id="btn-2" onclick="confirmarEscolha(2, '✂️')">✂️</button>
+            </div>
+            <p id="aguarde-msg" style="display:none; color: #f1c40f;">Pronto! O Dono vai iniciar o duelo...</p>
+        </div>
+    </div>
+
+    <script>
+        let estado = {
+            idSala: "",
+            dono: "",
+            jogadores: [],
+            escolhas: {}
+        };
+
+        function mudarTela(id) {
+            document.querySelectorAll('.tela').forEach(t => t.classList.remove('ativa'));
+            document.getElementById(id).classList.add('ativa');
+        }
+
+        // --- Lógica do Dono ---
+        function criarSala() {
+            const nome = document.getElementById('meu-nome').value;
+            if(!nome) return alert("Digite seu nome!");
+            
+            const idGerado = Math.floor(1000 + Math.random() * 9000); // ID de 4 dígitos
+            document.getElementById('display-id').innerText = idGerado;
+            mudarTela('tela-dono');
+            
+            // Simulação de entrada de jogadores (como se fosse via rede)
+            console.log("Sala Criada. ID: " + idGerado);
+        }
+
+        // --- Lógica do Jogador ---
+        function entrarNaSala() {
+            const nome = document.getElementById('meu-nome').value;
+            const id = document.getElementById('input-id').value;
+            if(!nome || !id) return alert("Preencha nome e ID!");
+            
+            document.getElementById('span-nome-jogador').innerText = nome;
+            document.getElementById('span-id-conectado').innerText = id;
+            mudarTela('tela-jogador');
+            
+            // Simular que alguém já escolheu Pedra (ID 0)
+            // Se fosse online, o servidor mandaria: "Botão 0 desativado"
+            document.getElementById('btn-0').disabled = true; 
+            document.getElementById('btn-0').style.opacity = "0.2";
+        }
+
+        function confirmarEscolha(tipo, icone) {
+            alert("Você escolheu " + icone);
+            document.querySelectorAll('.btn-arma').forEach(b => b.disabled = true);
+            document.getElementById('aguarde-msg').style.display = "block";
+            
+            // No jogo real, aqui enviamos para o Dono:
+            // enviarAoDono(nome, tipo);
+        }
+
+        // --- Lógica de Início (Só o Dono vê) ---
+        function comecarJogo() {
+            document.getElementById('resultado-final').innerText = "3... 2... 1... 🤜💥🤛";
+            setTimeout(() => {
+                document.getElementById('resultado-final').innerText = "JOÃO (🪨) GANHOU DE MARIA (✂️)!";
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
